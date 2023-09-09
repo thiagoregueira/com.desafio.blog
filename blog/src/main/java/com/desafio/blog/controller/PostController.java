@@ -49,7 +49,7 @@ public class PostController {
                 PostDto postagemDto = new PostDto();
                 postagemDto.setTitulo(postagem.getTitulo());
                 postagemDto.setConteudo(postagem.getConteudo());
-                postagemDto.setComentarios(comentarioRepository.findByPostagem(postagem));
+                postagemDto.setComentarios(comentarioRepository.findByPost(postagem));
                 postagemDto.setAutor(usuarioRepository.findById(postagem.getAutor().getIdUsuario()).orElse(null));
                 postagensDto.add(postagemDto);
             }
@@ -65,7 +65,7 @@ public class PostController {
             PostDto postagemDto = new PostDto();
             postagemDto.setTitulo(postagem.getTitulo());
             postagemDto.setConteudo(postagem.getConteudo());
-            postagemDto.setComentarios(comentarioRepository.findByPostagem(postagem));
+            postagemDto.setComentarios(comentarioRepository.findByPost(postagem));
             postagemDto.setAutor(usuarioRepository.findById(postagem.getAutor().getIdUsuario()).orElse(null));
             return new ResponseEntity<>(postagemDto, HttpStatus.OK);
         } else {

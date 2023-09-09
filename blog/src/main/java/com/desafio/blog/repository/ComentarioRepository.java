@@ -11,7 +11,7 @@ import jakarta.transaction.Transactional;
 
 public interface ComentarioRepository extends JpaRepository<Comentario, Long> {
 
-    List<Comentario> findByPostagem(Post postagem);
+    List<Comentario> findByPost(Post post);
 
     @Transactional
     void deleteByPostId(Long postId);
