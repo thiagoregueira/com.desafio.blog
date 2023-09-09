@@ -33,7 +33,7 @@ public class ComentarioController {
     public ResponseEntity<Comentario> criarComentario(@PathVariable Long postId,
             @RequestBody ComentarioDto comentarioDto) {
 
-        Optional<Post> postOptional = postRepository.findById(postId);
+        Optional<Post> postOptional = postRepository.findByIdPost(postId);
         if (postOptional.isPresent()) {
             Post post = postOptional.get();
             Comentario novoComentario = new Comentario();
