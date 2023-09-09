@@ -40,6 +40,6 @@ public class Comentario {
 
     @ManyToOne
     @JoinColumn(name = "idAutor")
-    private Usuario usuario;
+    private Usuario autor;
 
 }

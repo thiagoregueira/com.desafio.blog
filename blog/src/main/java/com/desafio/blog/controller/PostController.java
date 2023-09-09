@@ -1,9 +1,7 @@
 package com.desafio.blog.controller;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,87 +36,80 @@ public class PostController {
     @Autowired
     private ComentarioRepository comentarioRepository;
 
+    @PostMapping("")
+    public ResponseEntity<Post> createPost(@RequestBody PostDto novoPostDto) {
+        Post novoPost = new Post();
+        novoPost.setTitulo(novoPostDto.getTitulo());
+        novoPost.setConteudo(novoPostDto.getConteudo());
+        novoPost.setAutor(novoPostDto.getAutor());
+        Post post = postRepository.save(novoPost);
+        return new ResponseEntity<Post>(post, HttpStatus.CREATED);
+    }
+
     @GetMapping("")
-    public ResponseEntity<List<PostDto>> getAllPostagens() {
-        List<Post> postagens = postRepository.findAll();
-        if (postagens.isEmpty()) {
+    public ResponseEntity<List<PostDto>> getAllPosts() {
+        List<Post> posts = postRepository.findAll();
+        if (posts.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
-            List<PostDto> postagensDto = new ArrayList<>();
-            for (Post postagem : postagens) {
-                PostDto postagemDto = new PostDto();
-                postagemDto.setTitulo(postagem.getTitulo());
-                postagemDto.setConteudo(postagem.getConteudo());
-                postagemDto.setComentarios(comentarioRepository.findByPost(postagem));
-                postagemDto.setAutor(usuarioRepository.findById(postagem.getAutor().getIdUsuario()).orElse(null));
-                postagensDto.add(postagemDto);
+            List<PostDto> postsDto = new ArrayList<>();
+            for (Post post : posts) {
+                PostDto postDto = new PostDto();
+                postDto.setTitulo(post.getTitulo());
+                postDto.setConteudo(post.getConteudo());
+                postDto.setAutor(usuarioRepository.findById(post.getAutor().getIdUsuario()).orElse(null));
+                postDto.setComentarios(comentarioRepository.findByPost(post));
+                postsDto.add(postDto);
             }
-            return new ResponseEntity<>(postagensDto, HttpStatus.OK);
+            return new ResponseEntity<>(postsDto, HttpStatus.OK);
         }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PostDto> getPostagem(@PathVariable Long id) {
-        Optional<Post> postagemOptional = postRepository.findById(id);
-        if (postagemOptional.isPresent()) {
-            Post postagem = postagemOptional.get();
-            PostDto postagemDto = new PostDto();
-            postagemDto.setTitulo(postagem.getTitulo());
-            postagemDto.setConteudo(postagem.getConteudo());
-            postagemDto.setComentarios(comentarioRepository.findByPost(postagem));
-            postagemDto.setAutor(usuarioRepository.findById(postagem.getAutor().getIdUsuario()).orElse(null));
-            return new ResponseEntity<>(postagemDto, HttpStatus.OK);
+    public ResponseEntity<PostDto> getPost(@PathVariable Long id) {
+        Optional<Post> postOptional = postRepository.findById(id);
+        if (postOptional.isPresent()) {
+            Post post = postOptional.get();
+            PostDto postDto = new PostDto();
+            postDto.setTitulo(post.getTitulo());
+            postDto.setConteudo(post.getConteudo());
+            postDto.setAutor(usuarioRepository.findById(post.getAutor().getIdUsuario()).orElse(null));
+            postDto.setComentarios(comentarioRepository.findByPost(post));
+            return new ResponseEntity<>(postDto, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
-    @PostMapping("")
-    public ResponseEntity<Post> createPost(@RequestBody Post post) {
-        Post savedPost = postRepository.save(post);
-        return new ResponseEntity<>(savedPost, HttpStatus.CREATED);
-    }
-
     @PutMapping("/{id}")
-    public ResponseEntity<Post> updatePost(@PathVariable Long id, @RequestBody Post postDetails) {
-        Optional<Post> postO = postRepository.findById(id);
-        if (postO.isPresent()) {
-            Post post = postO.get();
-            post.setTitulo(postDetails.getTitulo());
-            post.setConteudo(postDetails.getConteudo());
-
-            return new ResponseEntity<>(postRepository.save(post), HttpStatus.OK);
+    public ResponseEntity<Post> updatePost(@PathVariable Long id, @RequestBody PostDto postDto) {
+        Optional<Post> postOptional = postRepository.findById(id);
+        if (postOptional.isPresent()) {
+            Post post = postOptional.get();
+            post.setTitulo(postDto.getTitulo());
+            post.setConteudo(postDto.getConteudo());
+            post.setAutor(postDto.getAutor());
+            return ResponseEntity.ok(postRepository.save(post));
         }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
+        return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String, Boolean>> deletePost(@PathVariable Long id) {
-
-        Optional<Post> post = postRepository.findById(id);
-        if (post.isPresent()) {
-            postRepository.delete(post.get());
-            Map<String, Boolean> response = new HashMap<>();
-            response.put("deleted", Boolean.TRUE);
-            return ResponseEntity.ok(response);
+    public ResponseEntity<Void> deletePost(@PathVariable Long id) {
+        Optional<Post> postOptional = postRepository.findById(id);
+        if (postOptional.isPresent()) {
+            Post post = postOptional.get();
+            // Pegar todos os comentarios associados ao post
+            List<Comentario> comentarios = comentarioRepository.findByPost(post);
+            // Deletar todos os comentarios associados ao post
+            for (Comentario comentario : comentarios) {
+                comentarioRepository.delete(comentario);
+            }
+            // Deletar o post
+            postRepository.delete(post);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
-
-    @PostMapping("/{id}/comments")
-    public ResponseEntity<Comentario> addCommentToPost(@PathVariable Long id, @RequestBody Comentario comentario) {
-        Optional<Post> postO = postRepository.findById(id);
-        if (postO.isPresent()) {
-            Post post = postO.get();
-            comentario.setPost(post);
-            Comentario savedComentario = comentarioRepository.save(comentario);
-            return new ResponseEntity<>(savedComentario, HttpStatus.CREATED);
-        }
-
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
-    }
-
 }

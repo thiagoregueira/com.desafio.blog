@@ -32,69 +32,72 @@ public class UsuarioController {
     private PostRepository postRepository;
 
     @PostMapping("")
-    public ResponseEntity<Usuario> createAutor(@RequestBody Usuario novoAutor) {
-        Usuario autor = usuarioRepository.save(novoAutor);
-        return new ResponseEntity<Usuario>(autor, HttpStatus.CREATED);
+    public ResponseEntity<Usuario> createUsuario(@RequestBody UsuarioDto novoUsuarioDto) {
+        Usuario novoUsuario = new Usuario();
+        novoUsuario.setNome(novoUsuarioDto.getNome());
+        novoUsuario.setSobrenome(novoUsuarioDto.getSobrenome());
+        novoUsuario.setEmail(novoUsuarioDto.getEmail());
+        novoUsuario.setSenha(novoUsuarioDto.getSenha());
+        Usuario usuario = usuarioRepository.save(novoUsuario);
+        return new ResponseEntity<Usuario>(usuario, HttpStatus.CREATED);
     }
 
     @GetMapping("")
-    public ResponseEntity<List<UsuarioDto>> getAllAutores() {
-        List<Usuario> autores = usuarioRepository.findAll();
-        if (autores.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    public ResponseEntity<List<UsuarioDto>> getAllUsuarios() {
+        List<Usuario> usuarios = usuarioRepository.findAll();
+        if (usuarios.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
-            List<UsuarioDto> autoresDto = new ArrayList<>();
-            for (Usuario autor : autores) {
-                UsuarioDto autorDto = new UsuarioDto();
-                autorDto.setNome(autor.getNome());
-                autorDto.setSobrenome(autor.getSobrenome());
-                autorDto.setEmail(autor.getEmail());
-                autorDto.setSenha(autor.getSenha());
-                autorDto.setPosts(postRepository.findByAutor(autor));
-                autoresDto.add(autorDto);
+            List<UsuarioDto> usuariosDto = new ArrayList<>();
+            for (Usuario usuario : usuarios) {
+                UsuarioDto usuarioDto = new UsuarioDto();
+                usuarioDto.setNome(usuario.getNome());
+                usuarioDto.setSobrenome(usuario.getSobrenome());
+                usuarioDto.setEmail(usuario.getEmail());
+                usuarioDto.setSenha(usuario.getSenha());
+                usuarioDto.setPosts(postRepository.findByAutor(usuario));
+                usuariosDto.add(usuarioDto);
             }
-            return new ResponseEntity<>(autoresDto, HttpStatus.OK);
+            return new ResponseEntity<>(usuariosDto, HttpStatus.OK);
         }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UsuarioDto> getAutor(@PathVariable Long id) {
-        Optional<Usuario> autorOptional = usuarioRepository.findById(id);
-        if (autorOptional.isPresent()) {
-            Usuario autor = autorOptional.get();
-            UsuarioDto autorDto = new UsuarioDto();
-            autorDto.setNome(autor.getNome());
-            autorDto.setSobrenome(autor.getSobrenome());
-            autorDto.setEmail(autor.getEmail());
-            autorDto.setSenha(autor.getSenha());
-            autorDto.setPosts(postRepository.findByAutor(autor));
-            return new ResponseEntity<>(autorDto, HttpStatus.OK);
+    public ResponseEntity<UsuarioDto> getUsuario(@PathVariable Long id) {
+        Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
+        if (usuarioOptional.isPresent()) {
+            Usuario usuario = usuarioOptional.get();
+            UsuarioDto usuarioDto = new UsuarioDto();
+            usuarioDto.setNome(usuario.getNome());
+            usuarioDto.setSobrenome(usuario.getSobrenome());
+            usuarioDto.setEmail(usuario.getEmail());
+            usuarioDto.setSenha(usuario.getSenha());
+            usuarioDto.setPosts(postRepository.findByAutor(usuario));
+            return new ResponseEntity<>(usuarioDto, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Usuario> updateAutor(@PathVariable Long id, @RequestBody Usuario autorAtualizado) {
-        Optional<Usuario> autorOptional = usuarioRepository.findById(id);
-        if (autorOptional.isPresent()) {
-            Usuario autor = autorOptional.get();
-            autor.setNome(autorAtualizado.getNome());
-            autor.setSobrenome(autorAtualizado.getSobrenome());
-            autor.setEmail(autorAtualizado.getEmail());
-            autor.setSenha(autorAtualizado.getSenha());
-            usuarioRepository.save(autor);
-            return new ResponseEntity<Usuario>(autor, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<Usuario>(HttpStatus.NOT_FOUND);
+    public ResponseEntity<Usuario> updateUsuario(@PathVariable Long id, @RequestBody UsuarioDto usuarioDto) {
+        Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
+        if (usuarioOptional.isPresent()) {
+            Usuario usuario = usuarioOptional.get();
+            usuario.setNome(usuarioDto.getNome());
+            usuario.setSobrenome(usuarioDto.getSobrenome());
+            usuario.setEmail(usuarioDto.getEmail());
+            usuario.setSenha(usuarioDto.getSenha());
+            return ResponseEntity.ok(usuarioRepository.save(usuario));
         }
+        return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAutor(@PathVariable Long id) {
-        Optional<Usuario> autorOptional = usuarioRepository.findById(id);
-        if (autorOptional.isPresent()) {
-            usuarioRepository.delete(autorOptional.get());
+    public ResponseEntity<Void> deleteUsuario(@PathVariable Long id) {
+        Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
+        if (usuarioOptional.isPresent()) {
+            usuarioRepository.delete(usuarioOptional.get());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

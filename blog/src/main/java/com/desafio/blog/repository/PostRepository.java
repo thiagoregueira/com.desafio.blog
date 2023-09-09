@@ -9,5 +9,5 @@ import com.desafio.blog.model.Usuario;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
 
-    List<Post> findByAutor(Usuario usuario);
+    List<Post> findByAutor(Usuario autor);
 }
