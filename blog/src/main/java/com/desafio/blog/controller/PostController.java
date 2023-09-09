@@ -67,7 +67,7 @@ public class PostController {
 
     @GetMapping("/{id}")
     public ResponseEntity<PostDto> getPost(@PathVariable Long id) {
-        Optional<Post> postOptional = postRepository.findById(id);
+        Optional<Post> postOptional = postRepository.findByIdPost(id);
         if (postOptional.isPresent()) {
             Post post = postOptional.get();
             PostDto postDto = new PostDto();
@@ -83,7 +83,7 @@ public class PostController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Post> updatePost(@PathVariable Long id, @RequestBody PostDto postDto) {
-        Optional<Post> postOptional = postRepository.findById(id);
+        Optional<Post> postOptional = postRepository.findByIdPost(id);
         if (postOptional.isPresent()) {
             Post post = postOptional.get();
             post.setTitulo(postDto.getTitulo());
@@ -96,7 +96,7 @@ public class PostController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePost(@PathVariable Long id) {
-        Optional<Post> postOptional = postRepository.findById(id);
+        Optional<Post> postOptional = postRepository.findByIdPost(id);
         if (postOptional.isPresent()) {
             Post post = postOptional.get();
             // Pegar todos os comentarios associados ao post
